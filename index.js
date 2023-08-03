@@ -17,7 +17,7 @@ const updateJwplayerMedia = async (siteId, mediaId, customParams) => {
         data: {
             metadata: {
                 custom_params: {
-                    status: 'VOD',
+                    status: customParams.status,
                     contentType: customParams.contentType,
                     free: customParams.free,
                     livestream_channel_id: customParams.livestream_channel_id,
@@ -71,15 +71,26 @@ const getJwplayerMedia = async (siteId, mediaId) => {
     return response;
 }
 
+const isEmpty = (obj) => {
+  for (const prop in obj) {
+    if (Object.hasOwn(obj, prop)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 const updateMedia = async (event) => {
     let media = await getJwplayerMedia(event.site_id, event.media_id);
-    if (media.metadata.custom_params.status === undefined || media.metadata.custom_params.status === "VOD") {
+    console.log(media);
+    if (isEmpty(media.metadata.custom_params) || media.metadata.custom_params.status === "VOD") {
         console.log('no data')
         return
     }
     let customParams = media.metadata.custom_params;
     customParams.status = "VOD";
     let response = await updateJwplayerMedia(event.site_id, event.media_id, customParams)
+    console.log(response);
     return response
 }
 
@@ -90,5 +101,5 @@ export const handler = async (event, context) => {
         }
     }
     console.log(event);
-    updateMedia(event);
+    return updateMedia(event);
 };
